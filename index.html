@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>旗デザイン・紋章学クリエイターゲーム</title>
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white min-h-screen flex flex-col items-center p-4">
+<h1 class="text-2xl font-bold text-yellow-300 mt-4 mb-1">旗デザイン・紋章学クリエイター</h1>
+<p class="text-gray-400 text-sm mb-4">紋章学のルールに従ってオリジナルの旗を作ろう</p>
+
+<div class="flex flex-wrap gap-6 justify-center w-full max-w-3xl">
+  <!-- Flag canvas -->
+  <div class="flex flex-col items-center">
+    <div class="border-2 border-yellow-600 rounded shadow-lg" style="width:300px;height:200px;">
+      <svg id="flagSvg" width="300" height="200" xmlns="http://www.w3.org/2000/svg" aria-label="旗プレビュー"></svg>
+    </div>
+    <div class="flex gap-2 mt-3">
+      <button id="downloadBtn" aria-label="旗をPNG保存" class="bg-yellow-600 hover:bg-yellow-500 text-black font-bold px-4 py-2 rounded text-sm">PNG保存</button>
+      <button id="showCodeBtn" aria-label="SVGコードを表示" class="bg-gray-600 hover:bg-gray-500 text-white font-bold px-4 py-2 rounded text-sm">コード表示</button>
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <div class="flex flex-col gap-3 min-w-[220px]">
+    <div>
+      <label class="block text-sm text-gray-300 mb-1">背景色</label>
+      <div class="flex gap-2 flex-wrap">
+        <button aria-label="背景色: 赤" data-bg="#c0392b" class="bgColorBtn w-7 h-7 rounded border-2 border-transparent hover:border-white" style="background:#c0392b"></button>
+        <button aria-label="背景色: 青" data-bg="#2980b9" class="bgColorBtn w-7 h-7 rounded border-2 border-transparent hover:border-white" style="background:#2980b9"></button>
+        <button aria-label="背景色: 緑" data-bg="#27ae60" class="bgColorBtn w-7 h-7 rounded border-2 border-transparent hover:border-white" style="background:#27ae60"></button>
+        <button aria-label="背景色: 黒" data-bg="#1a1a1a" class="bgColorBtn w-7 h-7 rounded border-2 border-transparent hover:border-white" style="background:#1a1a1a"></button>
+        <button aria-label="背景色: 白" data-bg="#f5f5f5" class="bgColorBtn w-7 h-7 rounded border-2 border-transparent hover:border-white" style="background:#f5f5f5"></button>
+        <button aria-label="背景色: 金" data-bg="#f39c12" class="bgColorBtn w-7 h-7 rounded border-2 border-transparent hover:border-white" style="background:#f39c12"></button>
+        <button aria-label="背景色: 紫" data-bg="#8e44ad" class="bgColorBtn w-7 h-7 rounded border-2 border-transparent hover:border-white" style="background:#8e44ad"></button>
+      </div>
+    </div>
+
+    <div>
+      <label class="block text-sm text-gray-300 mb-1">前景色（模様・紋章）</label>
+      <div class="flex gap-2 flex-wrap">
+        <button aria-label="前景色: 金" data-fg="#f1c40f" class="fgColorBtn w-7 h-7 rounded border-2 border-transparent hover:border-white" style="background:#f1c40f"></button>
+        <button aria-label="前景色: 白" data-fg="#ffffff" class="fgColorBtn w-7 h-7 rounded border-2 border-transparent hover:border-white" style="background:#ffffff"></button>
+        <button aria-label="前景色: 赤" data-fg="#e74c3c" class="fgColorBtn w-7 h-7 rounded border-2 border-transparent hover:border-white" style="background:#e74c3c"></button>
+        <button aria-label="前景色: 黒" data-fg="#111111" class="fgColorBtn w-7 h-7 rounded border-2 border-transparent hover:border-white" style="background:#111111"></button>
+        <button aria-label="前景色: 銀" data-fg="#bdc3c7" class="fgColorBtn w-7 h-7 rounded border-2 border-transparent hover:border-white" style="background:#bdc3c7"></button>
+        <button aria-label="前景色: 青" data-fg="#3498db" class="fgColorBtn w-7 h-7 rounded border-2 border-transparent hover:border-white" style="background:#3498db"></button>
+      </div>
+    </div>
+
+    <div>
+      <label class="block text-sm text-gray-300 mb-1">模様</label>
+      <select id="patternSelect" aria-label="旗の模様を選択" class="bg-gray-700 text-white rounded px-2 py-1 w-full text-sm">
+        <option value="none">なし（無地）</option>
+        <option value="vstripe">縦縞（2本）</option>
+        <option value="hstripe">横縞（2本）</option>
+        <option value="cross">十字</option>
+        <option value="saltire">斜め十字（バツ）</option>
+        <option value="nordic">スカンジナビア十字</option>
+        <option value="tricolor_v">三色縦割り</option>
+        <option value="tricolor_h">三色横割り</option>
+      </select>
+    </div>
+
+    <div>
+      <label class="block text-sm text-gray-300 mb-1">シンボル</label>
+      <select id="symbolSelect" aria-label="シンボルを選択" class="bg-gray-700 text-white rounded px-2 py-1 w-full text-sm">
+        <option value="none">なし</option>
+        <option value="star5">五芒星</option>
+        <option value="star6">六芒星</option>
+        <option value="moon">三日月</option>
+        <option value="sword">剣</option>
+        <option value="shield">盾</option>
+        <option value="lion">ライオン（簡略）</option>
+        <option value="eagle">鷲（簡略）</option>
+        <option value="crown">王冠</option>
+      </select>
+    </div>
+
+    <div>
+      <label class="block text-sm text-gray-300 mb-1">シンボル2色目</label>
+      <div class="flex gap-2 flex-wrap">
+        <button aria-label="シンボル2色: 金" data-s2="#f1c40f" class="s2ColorBtn w-7 h-7 rounded border-2 border-transparent hover:border-white" style="background:#f1c40f"></button>
+        <button aria-label="シンボル2色: 白" data-s2="#ffffff" class="s2ColorBtn w-7 h-7 rounded border-2 border-transparent hover:border-white" style="background:#ffffff"></button>
+        <button aria-label="シンボル2色: 赤" data-s2="#e74c3c" class="s2ColorBtn w-7 h-7 rounded border-2 border-transparent hover:border-white" style="background:#e74c3c"></button>
+        <button aria-label="シンボル2色: 黒" data-s2="#111111" class="s2ColorBtn w-7 h-7 rounded border-2 border-transparent hover:border-white" style="background:#111111"></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Code display -->
+<div id="codePanel" class="hidden mt-4 w-full max-w-2xl">
+  <div class="bg-gray-800 rounded p-3">
+    <div class="text-xs text-gray-400 mb-1">SVGコード（コピー可）</div>
+    <pre id="codeDisplay" class="text-xs text-green-400 overflow-x-auto whitespace-pre-wrap break-all"></pre>
+  </div>
+</div>
+
+<canvas id="exportCanvas" width="300" height="200" class="hidden" aria-label="エクスポート用キャンバス"></canvas>
+
+<script>
+function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+let bgColor = '#2980b9';
+let fgColor = '#f1c40f';
+let s2Color = '#ffffff';
+let pattern = 'none';
+let symbol = 'none';
+
+const W = 300, H = 200;
+const svg = document.getElementById('flagSvg');
+
+function makeSvgEl(tag, attrs) {
+  const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+  for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
+  return el;
+}
+
+function drawFlag() {
+  while (svg.firstChild) svg.removeChild(svg.firstChild);
+
+  // Background
+  svg.appendChild(makeSvgEl('rect', { x: 0, y: 0, width: W, height: H, fill: bgColor }));
+
+  // Pattern
+  switch (pattern) {
+    case 'vstripe':
+      svg.appendChild(makeSvgEl('rect', { x: W/3, y: 0, width: W/3, height: H, fill: fgColor }));
+      break;
+    case 'hstripe':
+      svg.appendChild(makeSvgEl('rect', { x: 0, y: H/3, width: W, height: H/3, fill: fgColor }));
+      break;
+    case 'cross':
+      svg.appendChild(makeSvgEl('rect', { x: W/2 - 15, y: 0, width: 30, height: H, fill: fgColor }));
+      svg.appendChild(makeSvgEl('rect', { x: 0, y: H/2 - 15, width: W, height: 30, fill: fgColor }));
+      break;
+    case 'saltire': {
+      const d = `M0,0 L${W},${H} M${W},0 L0,${H}`;
+      const el = makeSvgEl('path', { d, stroke: fgColor, 'stroke-width': 28, fill: 'none' });
+      svg.appendChild(el);
+      break;
+    }
+    case 'nordic':
+      svg.appendChild(makeSvgEl('rect', { x: W*0.3 - 12, y: 0, width: 24, height: H, fill: fgColor }));
+      svg.appendChild(makeSvgEl('rect', { x: 0, y: H/2 - 12, width: W, height: 24, fill: fgColor }));
+      break;
+    case 'tricolor_v':
+      svg.appendChild(makeSvgEl('rect', { x: 0, y: 0, width: W/3, height: H, fill: bgColor }));
+      svg.appendChild(makeSvgEl('rect', { x: W/3, y: 0, width: W/3, height: H, fill: fgColor }));
+      svg.appendChild(makeSvgEl('rect', { x: W*2/3, y: 0, width: W/3, height: H, fill: s2Color }));
+      break;
+    case 'tricolor_h':
+      svg.appendChild(makeSvgEl('rect', { x: 0, y: 0, width: W, height: H/3, fill: bgColor }));
+      svg.appendChild(makeSvgEl('rect', { x: 0, y: H/3, width: W, height: H/3, fill: fgColor }));
+      svg.appendChild(makeSvgEl('rect', { x: 0, y: H*2/3, width: W, height: H/3, fill: s2Color }));
+      break;
+  }
+
+  // Symbol
+  const cx = W / 2, cy = H / 2;
+  switch (symbol) {
+    case 'star5': svg.appendChild(makeStar5(cx, cy, 48, 20, fgColor)); break;
+    case 'star6': svg.appendChild(makeStar6(cx, cy, 46, fgColor)); break;
+    case 'moon': svg.appendChild(makeMoon(cx, cy, fgColor)); break;
+    case 'sword': svg.appendChild(makeSword(cx, cy, fgColor)); break;
+    case 'shield': svg.appendChild(makeShield(cx, cy, fgColor)); break;
+    case 'lion': svg.appendChild(makeLion(cx, cy, fgColor)); break;
+    case 'eagle': svg.appendChild(makeEagle(cx, cy, fgColor)); break;
+    case 'crown': svg.appendChild(makeCrown(cx, cy, fgColor)); break;
+  }
+
+  // Border
+  svg.appendChild(makeSvgEl('rect', { x: 0, y: 0, width: W, height: H, fill: 'none', stroke: 'rgba(0,0,0,0.3)', 'stroke-width': 2 }));
+}
+
+function makeStar5(cx, cy, r1, r2, fill) {
+  const pts = [];
+  for (let i = 0; i < 10; i++) {
+    const r = i % 2 === 0 ? r1 : r2;
+    const a = (i * Math.PI / 5) - Math.PI / 2;
+    pts.push(`${cx + Math.cos(a) * r},${cy + Math.sin(a) * r}`);
+  }
+  return makeSvgEl('polygon', { points: pts.join(' '), fill });
+}
+
+function makeStar6(cx, cy, r, fill) {
+  const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+  const pts1 = [], pts2 = [];
+  for (let i = 0; i < 3; i++) {
+    const a = (i * 2 * Math.PI / 3) - Math.PI / 2;
+    pts1.push(`${cx + Math.cos(a) * r},${cy + Math.sin(a) * r}`);
+    const a2 = a + Math.PI / 3;
+    pts2.push(`${cx + Math.cos(a2) * r},${cy + Math.sin(a2) * r}`);
+  }
+  g.appendChild(makeSvgEl('polygon', { points: pts1.join(' '), fill, opacity: '0.9' }));
+  g.appendChild(makeSvgEl('polygon', { points: pts2.join(' '), fill, opacity: '0.9' }));
+  return g;
+}
+
+function makeMoon(cx, cy, fill) {
+  const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+  g.appendChild(makeSvgEl('circle', { cx, cy, r: 36, fill }));
+  g.appendChild(makeSvgEl('circle', { cx: cx + 18, cy: cy - 10, r: 30, fill: 'transparent', style: `mix-blend-mode:multiply` }));
+  // Manual crescent with path
+  const d = `M ${cx} ${cy - 36} A 36 36 0 1 1 ${cx} ${cy + 36} A 22 30 0 1 0 ${cx} ${cy - 36}`;
+  g.appendChild(makeSvgEl('path', { d, fill }));
+  return g;
+}
+
+function makeSword(cx, cy, fill) {
+  const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+  // Blade
+  g.appendChild(makeSvgEl('rect', { x: cx - 4, y: cy - 55, width: 8, height: 90, fill, rx: 2 }));
+  // Crossguard
+  g.appendChild(makeSvgEl('rect', { x: cx - 24, y: cy + 20, width: 48, height: 10, fill, rx: 3 }));
+  // Handle
+  g.appendChild(makeSvgEl('rect', { x: cx - 5, y: cy + 30, width: 10, height: 28, fill: s2Color, rx: 3 }));
+  // Pommel
+  g.appendChild(makeSvgEl('circle', { cx, cy: cy + 60, r: 8, fill }));
+  return g;
+}
+
+function makeShield(cx, cy, fill) {
+  const d = `M${cx},${cy + 55} C${cx - 44},${cy + 20} ${cx - 44},${cy - 30} ${cx - 44},${cy - 50} L${cx + 44},${cy - 50} C${cx + 44},${cy - 30} ${cx + 44},${cy + 20} ${cx},${cy + 55}Z`;
+  const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+  g.appendChild(makeSvgEl('path', { d, fill, stroke: s2Color, 'stroke-width': 3 }));
+  // Dividing lines
+  g.appendChild(makeSvgEl('line', { x1: cx, y1: cy - 50, x2: cx, y2: cy + 55, stroke: s2Color, 'stroke-width': 2 }));
+  g.appendChild(makeSvgEl('line', { x1: cx - 44, y1: cy - 10, x2: cx + 44, y2: cy - 10, stroke: s2Color, 'stroke-width': 2 }));
+  return g;
+}
+
+function makeLion(cx, cy, fill) {
+  const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+  // Body
+  g.appendChild(makeSvgEl('ellipse', { cx, cy: cy + 10, rx: 28, ry: 22, fill }));
+  // Head
+  g.appendChild(makeSvgEl('circle', { cx: cx + 20, cy: cy - 20, r: 20, fill }));
+  // Mane
+  for (let i = 0; i < 8; i++) {
+    const a = (i / 8) * Math.PI * 2;
+    g.appendChild(makeSvgEl('circle', { cx: (cx + 20) + Math.cos(a) * 18, cy: (cy - 20) + Math.sin(a) * 18, r: 9, fill: s2Color }));
+  }
+  g.appendChild(makeSvgEl('circle', { cx: cx + 20, cy: cy - 20, r: 15, fill }));
+  // Eye
+  g.appendChild(makeSvgEl('circle', { cx: cx + 26, cy: cy - 23, r: 4, fill: '#1a1a1a' }));
+  g.appendChild(makeSvgEl('circle', { cx: cx + 27, cy: cy - 24, r: 1.5, fill: '#fff' }));
+  // Tail
+  const td = `M${cx - 28},${cy + 10} Q${cx - 50},${cy - 10} ${cx - 40},${cy - 30} Q${cx - 32},${cy - 45} ${cx - 25},${cy - 38}`;
+  g.appendChild(makeSvgEl('path', { d: td, stroke: fill, 'stroke-width': 6, fill: 'none', 'stroke-linecap': 'round' }));
+  // Legs
+  for (const lx of [cx - 14, cx + 2]) {
+    g.appendChild(makeSvgEl('rect', { x: lx, y: cy + 28, width: 10, height: 22, fill, rx: 4 }));
+  }
+  return g;
+}
+
+function makeEagle(cx, cy, fill) {
+  const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+  // Wings
+  const lw = `M${cx},${cy} Q${cx - 50},${cy - 20} ${cx - 70},${cy - 50} Q${cx - 50},${cy - 10} ${cx},${cy + 15}Z`;
+  const rw = `M${cx},${cy} Q${cx + 50},${cy - 20} ${cx + 70},${cy - 50} Q${cx + 50},${cy - 10} ${cx},${cy + 15}Z`;
+  g.appendChild(makeSvgEl('path', { d: lw, fill }));
+  g.appendChild(makeSvgEl('path', { d: rw, fill }));
+  // Body
+  g.appendChild(makeSvgEl('ellipse', { cx, cy: cy + 10, rx: 14, ry: 24, fill }));
+  // Head
+  g.appendChild(makeSvgEl('circle', { cx, cy: cy - 20, r: 14, fill }));
+  // Beak
+  g.appendChild(makeSvgEl('polygon', { points: `${cx + 14},${cy - 18} ${cx + 28},${cy - 14} ${cx + 14},${cy - 10}`, fill: '#f1c40f' }));
+  // Eye
+  g.appendChild(makeSvgEl('circle', { cx: cx + 6, cy: cy - 22, r: 4, fill: '#1a1a1a' }));
+  // Tail
+  g.appendChild(makeSvgEl('polygon', { points: `${cx - 12},${cy + 32} ${cx + 12},${cy + 32} ${cx},${cy + 55}`, fill }));
+  return g;
+}
+
+function makeCrown(cx, cy, fill) {
+  const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+  // Base band
+  g.appendChild(makeSvgEl('rect', { x: cx - 42, y: cy + 10, width: 84, height: 22, fill, rx: 4 }));
+  // Points
+  const points = [[cx - 42, cy + 10], [cx - 30, cy - 20], [cx - 14, cy + 2], [cx, cy - 32], [cx + 14, cy + 2], [cx + 30, cy - 20], [cx + 42, cy + 10]];
+  g.appendChild(makeSvgEl('polygon', { points: points.map(p => p.join(',')).join(' '), fill }));
+  // Gems
+  for (const [gx, gy] of [[cx - 28, cy + 18], [cx, cy + 18], [cx + 28, cy + 18]]) {
+    g.appendChild(makeSvgEl('circle', { cx: gx, cy: gy, r: 6, fill: s2Color }));
+  }
+  return g;
+}
+
+function updateFlag() {
+  drawFlag();
+  if (!document.getElementById('codePanel').classList.contains('hidden')) {
+    updateCode();
+  }
+}
+
+function updateCode() {
+  document.getElementById('codeDisplay').textContent = svg.outerHTML;
+}
+
+document.querySelectorAll('.bgColorBtn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    bgColor = this.dataset.bg;
+    document.querySelectorAll('.bgColorBtn').forEach(b => b.classList.remove('border-white'));
+    this.classList.add('border-white');
+    updateFlag();
+  });
+});
+
+document.querySelectorAll('.fgColorBtn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    fgColor = this.dataset.fg;
+    document.querySelectorAll('.fgColorBtn').forEach(b => b.classList.remove('border-white'));
+    this.classList.add('border-white');
+    updateFlag();
+  });
+});
+
+document.querySelectorAll('.s2ColorBtn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    s2Color = this.dataset.s2;
+    document.querySelectorAll('.s2ColorBtn').forEach(b => b.classList.remove('border-white'));
+    this.classList.add('border-white');
+    updateFlag();
+  });
+});
+
+document.getElementById('patternSelect').addEventListener('change', function() {
+  pattern = this.value;
+  updateFlag();
+});
+
+document.getElementById('symbolSelect').addEventListener('change', function() {
+  symbol = this.value;
+  updateFlag();
+});
+
+document.getElementById('downloadBtn').addEventListener('click', function() {
+  const exportCanvas = document.getElementById('exportCanvas');
+  const ctx2 = exportCanvas.getContext('2d');
+  const svgData = new XMLSerializer().serializeToString(svg);
+  const blob = new Blob([svgData], { type: 'image/svg+xml' });
+  const url = URL.createObjectURL(blob);
+  const img = new Image();
+  img.onload = function() {
+    ctx2.drawImage(img, 0, 0);
+    URL.revokeObjectURL(url);
+    const a = document.createElement('a');
+    a.download = 'my-flag.png';
+    a.href = exportCanvas.toDataURL('image/png');
+    a.click();
+  };
+  img.src = url;
+});
+
+document.getElementById('showCodeBtn').addEventListener('click', function() {
+  const panel = document.getElementById('codePanel');
+  panel.classList.toggle('hidden');
+  if (!panel.classList.contains('hidden')) updateCode();
+});
+
+drawFlag();
+</script>
+</body>
+</html>
